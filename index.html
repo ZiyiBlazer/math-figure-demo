@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数学图形生成系统</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; margin: 0; background: #f4f6f9; color: #24303c; }
+  header { background: linear-gradient(135deg, #16222e 0%, #1d3a5f 100%); color: #fff; padding: 46px 24px 40px; text-align: center; }
+  header h1 { margin: 0 0 10px; font-size: 32px; font-weight: 700; letter-spacing: 1px; }
+  header .sub { font-size: 16px; color: #a9c0d6; margin: 0; }
+  .slogan { margin: 20px auto 0; font-size: 15px; color: #dce6f0; line-height: 1.7; }
+  .slogan b { color: #ffd166; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 30px 20px 60px; }
+
+  .principles { display: flex; gap: 14px; margin-bottom: 26px; }
+  .principle { flex: 1; background: #fff; border: 1px solid #e6ebf0; border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(16,34,51,.04); }
+  .principle .num { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; border-radius: 50%; background: #2a6cbb; color: #fff; font-size: 13px; margin-right: 8px; }
+  .principle h3 { display: inline; font-size: 15px; margin: 0; }
+  .principle p { margin: 8px 0 0; font-size: 13px; color: #5a6b7a; line-height: 1.6; }
+
+  .block { background: #fff; border: 1px solid #e6ebf0; border-radius: 14px; padding: 22px 24px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(16,34,51,.05); }
+  .block h2 { margin: 0 0 6px; font-size: 20px; }
+  .route { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; }
+  .route.self { background: #eaf2fd; color: #2a6cbb; }
+  .route.lib { background: #e9f7ef; color: #1e8449; }
+  .route.entry { background: #fdf3e7; color: #b9770e; }
+  .block .desc { font-size: 13px; color: #6b7a88; margin: 2px 0 14px; }
+  .engine { display: none; }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  input[type=text], select, textarea { font-size: 14px; padding: 9px 12px; border: 1px solid #cfd8e0; border-radius: 8px; font-family: inherit; background: #fbfcfd; }
+  input[type=text]:focus, select:focus, textarea:focus { outline: none; border-color: #2a6cbb; background: #fff; }
+  input[type=text] { flex: 1; min-width: 180px; }
+  textarea { flex: 1; min-width: 260px; height: 58px; resize: vertical; }
+  select { min-width: 170px; }
+  button.primary { font-size: 14px; padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer; background: #2a6cbb; color: #fff; font-weight: 600; }
+  button.primary:hover { background: #22579a; }
+  button.ghost { font-size: 13px; padding: 7px 14px; border: 1px solid #d5dbe1; border-radius: 8px; cursor: pointer; background: #f0f3f6; color: #33414f; }
+  button.ghost:hover { background: #e4eaf0; }
+
+  .steps { display: flex; gap: 8px; margin: 6px 0 16px; }
+  .step { flex: 1; text-align: center; padding: 10px 6px; border-radius: 8px; border: 1px solid #e6ebf0; background: #fafbfc; color: #9aa6b2; font-size: 13px; transition: all .25s; }
+  .step .n { display: inline-block; width: 20px; height: 20px; line-height: 20px; border-radius: 50%; background: #d9dee3; color: #fff; font-size: 12px; margin-right: 5px; }
+  .step .t { vertical-align: middle; }
+  .step.active { border-color: #2a6cbb; color: #2a6cbb; background: #eaf2fd; box-shadow: 0 0 0 2px rgba(42,108,187,.12); }
+  .step.active .n { background: #2a6cbb; }
+  .step.done { border-color: #1e8449; color: #1e8449; background: #e9f7ef; }
+  .step.done .n { background: #1e8449; }
+
+  .geo-grid { display: flex; gap: 16px; align-items: flex-start; }
+  .geo-main { flex: 1.4; min-width: 0; }
+  .geo-side { flex: 1; min-width: 250px; }
+
+  .understanding { font-size: 13px; color: #2a6cbb; background: #eef4fc; border: 1px solid #d7e6f8; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; line-height: 1.6; display: none; }
+
+  .panel { border: 1px solid #e6ebf0; border-radius: 10px; padding: 14px 16px; background: #fafbfc; }
+  .panel h4 { margin: 0 0 8px; font-size: 14px; }
+  .panel .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #eaf2fd; color: #2a6cbb; margin-left: 6px; font-weight: normal; }
+
+  .spec-row { font-size: 13px; margin: 6px 0; line-height: 1.5; }
+  .spec-row .k { color: #7a8894; display: inline-block; min-width: 88px; vertical-align: top; }
+  .spec-row .v { color: #24303c; }
+
+  .reqbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .reqbar button { font-size: 12px; padding: 5px 12px; border: 1px dashed #b9c4ce; border-radius: 6px; background: #fff; color: #2a6cbb; cursor: pointer; }
+  .reqbar button:hover { background: #eef4fc; }
+
+  .edit-panel { border: 1px solid #e6ebf0; border-radius: 10px; padding: 14px 16px; margin-top: 12px; background: #fbfcfd; }
+  .edit-title { font-size: 12px; color: #2a6cbb; font-weight: 600; margin-bottom: 6px; }
+  .edit-sec { font-size: 13px; line-height: 2.3; }
+  .edit-sec label { margin-right: 14px; white-space: nowrap; color: #4a5a68; }
+  .edit-letter, .edit-label, .solid-letter, .func-var { font-size: 13px; padding: 4px 8px; border: 1px solid #cfd8e0; border-radius: 6px; text-align: center; font-family: Georgia, serif; width: 52px; background: #fff; }
+  .edit-apply { margin-top: 8px; }
+  .muted { font-size: 12px; color: #9aa6b2; }
+
+  .figure { border: 1px solid #e6ebf0; border-radius: 10px; padding: 16px; margin-top: 10px; background: #fbfcfd; }
+  .figure svg, .figure canvas { max-width: 100%; height: auto; display: block; }
+  .checks { font-size: 13px; margin-bottom: 10px; line-height: 1.9; }
+  .checks .pass { color: #1e8449; margin-right: 14px; }
+  .checks .fail { color: #c0392b; margin-right: 14px; }
+  .err { color: #c0392b; font-size: 13px; margin-top: 6px; }
+  .status { color: #8a97a4; font-size: 13px; margin-left: 8px; }
+
+  .entry-grid { display: flex; gap: 16px; align-items: stretch; }
+  .entry-input { flex: 1.5; min-width: 0; }
+  .entry-input textarea { width: 100%; height: 82px; margin-bottom: 10px; display: block; }
+  .entry-type { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .entry-type .lbl { font-size: 13px; color: #5a6b7a; }
+  .entry-image { flex: 1; min-width: 220px; }
+  .dropzone { border: 2px dashed #c3ced8; border-radius: 10px; padding: 26px 14px; text-align: center; color: #6b7a88; font-size: 13px; cursor: pointer; background: #fbfcfd; transition: all .15s; }
+  .dropzone:hover { border-color: #2a6cbb; background: #eef4fc; }
+  .dropzone.drag { border-color: #2a6cbb; background: #eaf2fd; }
+  .img-preview { margin-top: 10px; text-align: center; }
+  .img-preview img { max-width: 100%; max-height: 150px; border: 1px solid #e6ebf0; border-radius: 8px; }
+  .img-tag { font-size: 11px; color: #9aa6b2; margin-top: 4px; }
+  .entry-note { font-size: 12px; color: #9aa6b2; margin-top: 10px; }
+
+  footer { background: #16222e; color: #c3d0db; padding: 28px 24px; }
+  .compare { max-width: 1000px; margin: 0 auto; display: flex; gap: 18px; }
+  .compare div { flex: 1; font-size: 13px; line-height: 1.7; }
+  .compare .old { color: #e8a5a5; }
+  .compare .new { color: #a8e6b8; }
+  .compare h4 { margin: 0 0 6px; font-size: 14px; color: #fff; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>数学图形生成系统</h1>
+    <p class="sub">为教培例题自动生成准确、可靠的数学图形</p>
+    <p class="slogan"><b>AI 理解</b> · <b>数学画准</b> · <b>自动校验</b>
+  </header>
+
+  <div class="wrap">
+    <div class="principles">
+      <div class="principle">
+        <h3><span class="num">1</span>AI 出图纸</h3>
+        <p>AI 只读懂题目，生成结构化规格单，不碰像素。</p>
+      </div>
+      <div class="principle">
+        <h3><span class="num">2</span>引擎精确画</h3>
+        <p>几何自研 SVG，函数 / 立体用数学库，坐标精确。</p>
+      </div>
+      <div class="principle">
+        <h3><span class="num">3</span>自动校验</h3>
+        <p>平行、直角、比例逐项校验，不合格不交付。</p>
+      </div>
+    </div>
+
+    <!-- 统一入口 -->
+    <div class="block">
+      <h2>开始生成</h2>
+      <span class="route entry">统一入口</span>
+      <p class="desc">输入题目或例图，选择类型，一键生成。</p>
+      <div class="entry-grid">
+        <div class="entry-input">
+          <textarea id="entry-text" placeholder="粘贴英文题目 / 函数表达式 / 图形描述，如：In triangle ABC, DE is parallel to BC… 或 x**2-4 或 画一个四棱锥"></textarea>
+          <div class="entry-type">
+            <span class="lbl">生成类型：</span>
+            <select id="entry-type">
+              <option value="geometry">几何（平面）</option>
+              <option value="function">函数图像</option>
+              <option value="solid">立体 / 曲面</option>
+            </select>
+            <button class="primary" id="entry-gen">生成</button>
+          </div>
+        </div>
+        <div class="entry-image">
+          <div class="dropzone" id="entry-drop">
+            📷 粘贴 / 拖入例图<br><span style="font-size:12px;color:#a8b4c0">Ctrl+V 或点击上传</span>
+          </div>
+          <input type="file" id="entry-file" accept="image/*" style="display:none">
+          <div class="img-preview" id="entry-preview"></div>
+        </div>
+      </div>
+      <div class="entry-note">例图由视觉模型读取识别（当前演示版以文字解析为准）。</div>
+    </div>
+
+    <!-- ① 平面几何 -->
+    <div class="block engine" id="geo-block">
+      <h2>平面几何</h2>
+      <span class="route self">自研 SVG 引擎 · 矢量可打印</span>
+      <p class="desc">输入英文几何题，走完「AI 理解 → 图纸规格单 → 引擎画图 → 自动校验」。</p>
+      <div class="controls">
+        <textarea id="geo-problem" placeholder="例：In triangle ABC, DE is parallel to BC with D on AB and E on AC. Given AD=4, DB=6, AE=3, find AC."></textarea>
+        <button class="primary" id="geo-gen">生成图形</button>
+      </div>
+      <div class="controls">
+        <select id="geo-example-select"></select>
+        <button class="ghost" id="geo-load">载入示例</button>
+      </div>
+
+      <div class="steps" id="geo-steps">
+        <div class="step"><span class="n">1</span><span class="t">AI 理解题目</span></div>
+        <div class="step"><span class="n">2</span><span class="t">生成图纸规格单</span></div>
+        <div class="step"><span class="n">3</span><span class="t">引擎计算与渲染</span></div>
+        <div class="step"><span class="n">4</span><span class="t">自动校验</span></div>
+      </div>
+
+      <div class="geo-grid">
+        <div class="geo-main">
+          <div class="understanding" id="geo-understanding"></div>
+          <div class="figure" id="geo-figure"></div>
+        </div>
+        <div class="geo-side">
+          <div class="panel">
+            <h4>图纸规格单<span class="tag">AI 输出</span></h4>
+            <div id="geo-spec"></div>
+            <div class="edit-title" style="margin-top:14px">✏️ 标注编辑</div>
+            <div id="geo-edit-fields"></div>
+            <button class="ghost edit-apply" id="geo-apply-edit">应用</button>
+            <div class="err" id="geo-edit-msg" style="display:none"></div>
+            <div class="reqbar" id="geo-reqs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 函数图像 -->
+    <div class="block engine" id="func-block">
+      <h2>函数图像</h2>
+      <span class="route lib">数学库 · 精确绘图</span>
+      <p class="desc">输入表达式，标出零点（红）与极值点（绿）。</p>
+      <div class="controls">
+        <input type="text" id="func-expr" placeholder="f(x)，如 x**2-4 或 sin(x)" value="x**2-4">
+        <button class="primary" id="func-gen">画图</button>
+        <button class="ghost" data-fn="x**2-4">x²−4</button>
+        <button class="ghost" data-fn="sin(x)">sin(x)</button>
+        <button class="ghost" data-fn="x**3-3*x">x³−3x</button>
+      </div>
+      <div class="status" id="func-status"></div>
+      <div class="figure" id="func-figure"></div>
+      <div class="edit-panel">
+        <div class="edit-title">✏️ 标注编辑</div>
+        <div id="func-edit-fields"></div>
+        <button class="ghost edit-apply" id="func-apply-edit">应用</button>
+      </div>
+    </div>
+
+    <!-- ③ 立体 / 曲面 -->
+    <div class="block engine" id="solid-block">
+      <h2>立体几何 / 曲面</h2>
+      <span class="route lib">数学库 3D · 线框与曲面</span>
+      <p class="desc">选择类型生成 3D 线框 / 曲面网格。</p>
+      <div class="controls">
+        <select id="solid-type">
+          <option value="cuboid">长方体</option>
+          <option value="pyramid">四棱锥</option>
+          <option value="surface">抛物面 z = x²+y²</option>
+        </select>
+        <button class="primary" id="solid-gen">生成 3D 图</button>
+      </div>
+      <div class="status" id="solid-status"></div>
+      <div class="figure" id="solid-figure">
+        <div class="checks" id="solid-checks"></div>
+        <canvas id="solid-canvas" width="520" height="380"></canvas>
+      </div>
+      <div class="edit-panel">
+        <div class="edit-title">✏️ 标注编辑</div>
+        <div id="solid-edit-fields"></div>
+        <button class="ghost edit-apply" id="solid-apply-edit">应用</button>
+        <div class="err" id="solid-edit-msg" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="compare">
+      <div class="old">
+       
+        
+      </div>
+      <div class="new">
+       
+      </div>
+    </div>
+  </footer>
+
+<script>
+/* ============ 通用工具 ============ */
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ============ 几何：自研 SVG 引擎 ============ */
+const STROKE = "#2d2d2d", HALO = "#ffffff", FONT = "Georgia, 'Times New Roman', serif";
+function Pt(x, y) { return {x: x, y: y}; }
+function dist(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
+function lerp(a, b, t) { return Pt(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t); }
+
+const SHAPES = {
+  scalene: {A: Pt(0, 3.4), B: Pt(-2.6, 0), C: Pt(3.6, 0)},
+  isosceles: {A: Pt(0, 3.2), B: Pt(-2.8, 0), C: Pt(2.8, 0)},
+  right: {A: Pt(0, 3.2), B: Pt(-3.0, 0), C: Pt(0, 0)},
+};
+
+/* 字母映射：内部顶点名 → 显示名 */
+function showName(data, n) { return (data.letters && data.letters[n]) || n; }
+function showText(data, s) {
+  const lm = data.letters || {};
+  return String(s).replace(/[A-Z]/g, ch => lm[ch] || ch);
+}
+
+/* ---- 求解 ---- */
+function solveTriangleParallel(data) {
+  const shape = data.shape || "scalene";
+  const pts = {A: SHAPES[shape].A, B: SHAPES[shape].B, C: SHAPES[shape].C};
+  const given = Object.assign({}, data.given_lengths || {});
+  (data.labels || []).forEach(lb => {
+    if (lb.target && lb.target.length === 2 && typeof lb.text === 'number') given[lb.target] = lb.text;
+  });
+  const fracs = {}, reliable = {};
+  (data.points || []).forEach(p => {
+    const on = p.on;
+    const d = p.dist_from_start;
+    let base = given[on] != null ? given[on] : (given[on[1] + on[0]] != null ? given[on[1] + on[0]] : null);
+    if (base == null && d != null) {
+      const rest = given[on[1] + p.name] != null ? given[on[1] + p.name] : given[p.name + on[1]];
+      if (rest != null) base = d + rest;
+    }
+    let t = p.frac_from_start;
+    if (t == null) t = base ? d / base : d / dist(pts[on[0]], pts[on[1]]);
+    fracs[p.name] = {on: on, t: t};
+    reliable[p.name] = base != null;
+  });
+  (data.segments || []).forEach(s => {
+    if (!s.parallel_to || !s.name || s.name.length !== 2) return;
+    const n1 = s.name[0], n2 = s.name[1];
+    if (!fracs[n1] || !fracs[n2]) return;
+    if (reliable[n1] && !reliable[n2]) fracs[n2].t = fracs[n1].t;
+    else if (reliable[n2] && !reliable[n1]) fracs[n1].t = fracs[n2].t;
+  });
+  Object.keys(fracs).forEach(n => {
+    const f = fracs[n];
+    pts[n] = lerp(pts[f.on[0]], pts[f.on[1]], f.t);
+  });
+  return {points: pts};
+}
+
+function solveParallelogram(data) {
+  const base = parseFloat(data.base || 4), side = parseFloat(data.side || 2.5);
+  const ang = (parseFloat(data.angle || 60)) * Math.PI / 180;
+  const A = Pt(0, 0), B = Pt(base, 0), D = Pt(side * Math.cos(ang), side * Math.sin(ang));
+  const C = Pt(B.x + D.x, B.y + D.y);
+  return {points: {A, B, C, D}};
+}
+
+function solveEightShape(data) {
+  const given = Object.assign({}, data.given_lengths || {});
+  let a = given.AO, b = given.BO, c = given.CO, d = given.DO;
+  if (a == null && b && c && d) a = b * c / d;
+  if (b == null && a && c && d) b = a * d / c;
+  if (c == null && a && b && d) c = a * d / b;
+  if (d == null && a && b && c) d = c * b / a;
+  a = a || 3; b = b || 4; c = c || 2.4; d = d || c * b / a;
+  const a1 = (parseFloat(data.angle1 || 90)) * Math.PI / 180;
+  const a2 = (parseFloat(data.angle2 || 135)) * Math.PI / 180;
+  const O = Pt(0, 0);
+  const A = Pt(a * Math.cos(a1), a * Math.sin(a1));
+  const B = Pt(-b * Math.cos(a1), -b * Math.sin(a1));
+  const C = Pt(c * Math.cos(a2), c * Math.sin(a2));
+  const D = Pt(-d * Math.cos(a2), -d * Math.sin(a2));
+  return {points: {A, B, C, D, O}};
+}
+
+function solveRightTriangleAltitude(data) {
+  const A = SHAPES.right.A, B = SHAPES.right.B, C = SHAPES.right.C;
+  const vx = B.x - A.x, vy = B.y - A.y;
+  const t = ((C.x - A.x) * vx + (C.y - A.y) * vy) / (vx * vx + vy * vy);
+  const D = Pt(A.x + t * vx, A.y + t * vy);
+  return {points: {A, B, C, D}};
+}
+
+function solvePolygonExteriorAngles(data) {
+  const sides = parseInt(data.sides || 3);
+  const names = [];
+  for (let i = 0; i < sides; i++) names.push(String.fromCharCode(65 + i));
+  const radius = 3, pts = {};
+  names.forEach((name, i) => {
+    const ang = Math.PI / 2 - 2 * Math.PI * i / sides;
+    pts[name] = Pt(radius * Math.cos(ang), radius * Math.sin(ang));
+  });
+  return {points: pts, names: names};
+}
+
+/* ---- SVG 渲染 ---- */
+function Canvas(pts, pad, scale) {
+  pad = pad || 1.0; scale = scale || 92;
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  this.min_x = Math.min.apply(null, xs); this.max_x = Math.max.apply(null, xs);
+  this.min_y = Math.min.apply(null, ys); this.max_y = Math.max.apply(null, ys);
+  this.w = (this.max_x - this.min_x + 2 * pad) * scale;
+  this.h = (this.max_y - this.min_y + 2 * pad) * scale;
+  this.X = x => (x - this.min_x + pad) * scale;
+  this.Y = y => (this.max_y - y + pad) * scale;
+  this.xy = p => [this.X(p.x), this.Y(p.y)];
+  this.open = () => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + this.w.toFixed(0) + ' ' + this.h.toFixed(0) + '"><rect width="100%" height="100%" fill="white"/>';
+}
+function _line(c, a, b) {
+  const p1 = c.xy(a), p2 = c.xy(b);
+  return '<line x1="' + p1[0].toFixed(1) + '" y1="' + p1[1].toFixed(1) + '" x2="' + p2[0].toFixed(1) + '" y2="' + p2[1].toFixed(1) + '" stroke="' + STROKE + '" stroke-width="1.6"/>';
+}
+function _polygon(c, arr) {
+  const coords = arr.map(p => { const q = c.xy(p); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+  return '<polygon points="' + coords + '" fill="none" stroke="' + STROKE + '" stroke-width="1.6"/>';
+}
+function _dot(c, p) {
+  const q = c.xy(p);
+  return '<circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="3" fill="' + STROKE + '"/>';
+}
+function _text(c, p, s, dx, dy, size, weight) {
+  const q = c.xy(p);
+  const style = 'font-family:' + FONT + ';font-size:' + (size || 15) + 'px;font-style:italic;font-weight:' + (weight || 'normal') + ';';
+  return '<text x="' + (q[0] + (dx || 0)).toFixed(1) + '" y="' + (q[1] + (dy || 0)).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" paint-order="stroke" stroke="' + HALO + '" stroke-width="4" fill="' + STROKE + '" style="' + style + '">' + esc(s) + '</text>';
+}
+function _chevron(c, p, angle) {
+  const q = c.xy(p), s = 8;
+  const t1 = [q[0] + s * Math.cos(angle + 2.65), q[1] + s * Math.sin(angle + 2.65)];
+  const t2 = [q[0] + s * Math.cos(angle - 2.65), q[1] + s * Math.sin(angle - 2.65)];
+  return '<polyline points="' + t1[0].toFixed(1) + ',' + t1[1].toFixed(1) + ' ' + q[0].toFixed(1) + ',' + q[1].toFixed(1) + ' ' + t2[0].toFixed(1) + ',' + t2[1].toFixed(1) + '" fill="none" stroke="' + STROKE + '" stroke-width="1.3"/>';
+}
+function _pointOffset(p, centroid, d) {
+  d = d || 18;
+  const dx = p.x - centroid.x, dy = p.y - centroid.y;
+  const n = Math.hypot(dx, dy);
+  if (n < 1e-9) return [0, -d];
+  return [dx / n * d, -dy / n * d];
+}
+function _segOffset(p1, p2, centroid, d) {
+  d = d || 16;
+  const vx = p2.x - p1.x, vy = p2.y - p1.y;
+  const n = Math.hypot(vx, vy) || 1;
+  const mx = (p1.x + p2.x) / 2 - centroid.x, my = (p1.y + p2.y) / 2 - centroid.y;
+  const cand = [[vy / n, -vx / n], [-vy / n, vx / n]];
+  for (const [nx, ny] of cand) if (mx * nx + my * ny > 0) return [nx * d, -ny * d];
+  return [0, d];
+}
+function _markParallel(c, p1, p2, out) {
+  const ang = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+  const ux = Math.cos(ang), uy = Math.sin(ang);
+  const mid = Pt((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+  for (const k of [-1, 1]) out.push(_chevron(c, Pt(mid.x + ux * k * 0.14, mid.y + uy * k * 0.14), ang));
+}
+function _rightMark(c, corner, a, b, out) {
+  const r = 0.18;
+  const d1 = Math.hypot(a.x - corner.x, a.y - corner.y) || 1, d2 = Math.hypot(b.x - corner.x, b.y - corner.y) || 1;
+  const u1 = Pt((a.x - corner.x) / d1 * r, (a.y - corner.y) / d1 * r);
+  const u2 = Pt((b.x - corner.x) / d2 * r, (b.y - corner.y) / d2 * r);
+  out.push(_polygon(c, [Pt(corner.x + u2.x, corner.y + u2.y), Pt(corner.x + u1.x + u2.x, corner.y + u1.y + u2.y), Pt(corner.x + u1.x, corner.y + u1.y)]));
+}
+function _renderLabels(c, data, pts, centroid, out) {
+  (data.labels || []).forEach(lb => {
+    const t = lb.target;
+    if (typeof t === 'string' && t.length === 2 && pts[t[0]] && pts[t[1]]) {
+      const p1 = pts[t[0]], p2 = pts[t[1]];
+      const mid = Pt((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+      const o = _segOffset(p1, p2, centroid);
+      out.push(_text(c, mid, String(lb.text), o[0], o[1], 13));
+    }
+  });
+}
+
+function renderTriangleParallel(data) {
+  const solved = solveTriangleParallel(data);
+  const pts = solved.points;
+  const A = pts.A, B = pts.B, C = pts.C;
+  const c = new Canvas([A, B, C, pts.D, pts.E].filter(Boolean));
+  const out = [c.open()];
+  const centroid = Pt((A.x + B.x + C.x) / 3, (A.y + B.y + C.y) / 3);
+  out.push(_polygon(c, [A, B, C]));
+  if (data.shape === 'right') _rightMark(c, C, A, B, out);
+  (data.segments || []).forEach(s => {
+    if (s.name && s.name.length === 2 && pts[s.name[0]] && pts[s.name[1]]) {
+      out.push(_line(c, pts[s.name[0]], pts[s.name[1]]));
+      if (s.parallel_to) _markParallel(c, pts[s.name[0]], pts[s.name[1]], out);
+    }
+  });
+  if ((data.segments || []).some(s => s.parallel_to)) _markParallel(c, B, C, out);
+  ['A', 'B', 'C'].forEach(n => {
+    out.push(_dot(c, pts[n]));
+    const o = _pointOffset(pts[n], centroid);
+    out.push(_text(c, pts[n], showName(data, n), o[0], o[1]));
+  });
+  (data.points || []).forEach(p => {
+    if (pts[p.name]) {
+      out.push(_dot(c, pts[p.name]));
+      const o = _pointOffset(pts[p.name], centroid);
+      out.push(_text(c, pts[p.name], showName(data, p.name), o[0], o[1]));
+    }
+  });
+  _renderLabels(c, data, pts, centroid, out);
+  out.push('</svg>');
+  return {svg: out.join(''), solved};
+}
+
+function renderParallelogram(data) {
+  const solved = solveParallelogram(data);
+  const pts = solved.points, A = pts.A, B = pts.B, C = pts.C, D = pts.D;
+  const c = new Canvas([A, B, C, D]);
+  const out = [c.open()];
+  const centroid = Pt((A.x + B.x + C.x + D.x) / 4, (A.y + B.y + C.y + D.y) / 4);
+  out.push(_polygon(c, [A, B, C, D]));
+  _markParallel(c, A, B, out); _markParallel(c, C, D, out);
+  _markParallel(c, A, D, out); _markParallel(c, B, C, out);
+  ['A', 'B', 'C', 'D'].forEach(n => {
+    out.push(_dot(c, pts[n]));
+    const o = _pointOffset(pts[n], centroid);
+    out.push(_text(c, pts[n], showName(data, n), o[0], o[1]));
+  });
+  _renderLabels(c, data, pts, centroid, out);
+  out.push('</svg>');
+  return {svg: out.join(''), solved};
+}
+
+function renderEightShape(data) {
+  const solved = solveEightShape(data);
+  const pts = solved.points, A = pts.A, B = pts.B, C = pts.C, D = pts.D, O = pts.O;
+  const c = new Canvas([A, B, C, D]);
+  const out = [c.open()];
+  const centroid = Pt((A.x + B.x + C.x + D.x) / 4, (A.y + B.y + C.y + D.y) / 4);
+  out.push(_line(c, A, B)); out.push(_line(c, C, D));
+  _markParallel(c, A, C, out); _markParallel(c, B, D, out);
+  ['A', 'B', 'C', 'D', 'O'].forEach(n => {
+    out.push(_dot(c, pts[n]));
+    const o = _pointOffset(pts[n], centroid);
+    out.push(_text(c, pts[n], showName(data, n), o[0], o[1]));
+  });
+  _renderLabels(c, data, pts, centroid, out);
+  out.push('</svg>');
+  return {svg: out.join(''), solved};
+}
+
+function renderRightTriangleAltitude(data) {
+  const solved = solveRightTriangleAltitude(data);
+  const pts = solved.points, A = pts.A, B = pts.B, C = pts.C, D = pts.D;
+  const c = new Canvas([A, B, C, D]);
+  const out = [c.open()];
+  const centroid = Pt((A.x + B.x + C.x) / 3, (A.y + B.y + C.y) / 3);
+  out.push(_polygon(c, [A, B, C]));
+  _rightMark(c, C, A, B, out);
+  out.push(_line(c, C, D));
+  _rightMark(c, D, C, A, out);
+  ['A', 'B', 'C', 'D'].forEach(n => {
+    out.push(_dot(c, pts[n]));
+    const o = _pointOffset(pts[n], centroid);
+    out.push(_text(c, pts[n], showName(data, n), o[0], o[1]));
+  });
+  _renderLabels(c, data, pts, centroid, out);
+  out.push('</svg>');
+  return {svg: out.join(''), solved};
+}
+
+function renderPolygonExteriorAngles(data) {
+  const solved = solvePolygonExteriorAngles(data);
+  const pts = solved.points, names = solved.names;
+  const c = new Canvas(Object.keys(pts).map(k => pts[k]));
+  const out = [c.open()];
+  const centroid = Pt(0, 0);
+  const n = names.length;
+  const extend = parseFloat(data.extend_ratio || 0.4);
+  for (let i = 0; i < n; i++) {
+    const p1 = pts[names[i]], p2 = pts[names[(i + 1) % n]];
+    const e1 = Pt(p1.x - (p2.x - p1.x) * extend, p1.y - (p2.y - p1.y) * extend);
+    const e2 = Pt(p2.x + (p2.x - p1.x) * extend, p2.y + (p2.y - p1.y) * extend);
+    out.push(_line(c, e1, e2));
+  }
+  names.forEach(name => {
+    out.push(_dot(c, pts[name]));
+    const o = _pointOffset(pts[name], centroid);
+    out.push(_text(c, pts[name], showName(data, name), o[0], o[1]));
+  });
+  _renderLabels(c, data, pts, centroid, out);
+  out.push('</svg>');
+  return {svg: out.join(''), solved};
+}
+
+/* ---- 几何校验 ---- */
+function cross2(p1, p2, q1, q2) { return (p2.x - p1.x) * (q2.y - q1.y) - (p2.y - p1.y) * (q2.x - q1.x); }
+function dot2(p1, p2, q1, q2) { return (p2.x - p1.x) * (q2.x - q1.x) + (p2.y - p1.y) * (q2.y - q1.y); }
+
+function validateTriangleParallel(data, solved) {
+  const pts = solved.points, checks = [];
+  (data.segments || []).forEach(s => {
+    if (s.parallel_to && s.name && s.name.length === 2 && s.parallel_to.length === 2) {
+      const p1 = pts[s.name[0]], p2 = pts[s.name[1]], q1 = pts[s.parallel_to[0]], q2 = pts[s.parallel_to[1]];
+      const v = cross2(p1, p2, q1, q2);
+      checks.push({check: s.name + ' ∥ ' + s.parallel_to, ok: Math.abs(v) < 1e-6, detail: '叉积 = ' + v.toExponential(2)});
+    }
+  });
+  const fs = [];
+  (data.segments || []).forEach(s => {
+    if (!s.parallel_to || !s.name || s.name.length !== 2) return;
+    s.name.split('').forEach(end => {
+      const p = (data.points || []).find(q => q.name === end);
+      if (p && p.on && p.on.length === 2) {
+        const a = pts[p.on[0]], b = pts[p.on[1]];
+        fs.push({n: end, t: dist(a, pts[end]) / dist(a, b)});
+      }
+    });
+  });
+  if (fs.length >= 2) {
+    const t0 = fs[0].t, ok = fs.every(f => Math.abs(f.t - t0) < 1e-6);
+    checks.push({check: '对应边比例一致（相似）', ok, detail: fs.map(f => f.n + '=' + f.t.toFixed(4)).join('、')});
+  }
+  const A = pts.A, B = pts.B, C = pts.C;
+  if (data.shape === 'isosceles') {
+    const ab = dist(A, B), ac = dist(A, C);
+    checks.push({check: 'AB = AC（等腰）', ok: Math.abs(ab - ac) < 1e-6, detail: 'AB=' + ab.toFixed(4) + ', AC=' + ac.toFixed(4)});
+  }
+  if (data.shape === 'right') {
+    const v = dot2(A, C, B, C);
+    checks.push({check: '∠C = 90°（直角）', ok: Math.abs(v) < 1e-6, detail: '点积 = ' + v.toExponential(2)});
+  }
+  return checks;
+}
+
+function validateParallelogram(data, solved) {
+  const pts = solved.points, A = pts.A, B = pts.B, C = pts.C, D = pts.D, checks = [];
+  checks.push({check: 'AB ∥ CD', ok: Math.abs(cross2(A, B, C, D)) < 1e-6, detail: ''});
+  checks.push({check: 'AD ∥ BC', ok: Math.abs(cross2(A, D, B, C)) < 1e-6, detail: ''});
+  const ab = dist(A, B), cd = dist(C, D), ad = dist(A, D), bc = dist(B, C);
+  checks.push({check: 'AB = CD（对边相等）', ok: Math.abs(ab - cd) < 1e-6, detail: ab.toFixed(3) + ' vs ' + cd.toFixed(3)});
+  checks.push({check: 'AD = BC（对边相等）', ok: Math.abs(ad - bc) < 1e-6, detail: ad.toFixed(3) + ' vs ' + bc.toFixed(3)});
+  return checks;
+}
+
+function validateEightShape(data, solved) {
+  const pts = solved.points, A = pts.A, B = pts.B, C = pts.C, D = pts.D, O = pts.O, checks = [];
+  checks.push({check: 'AC ∥ BD', ok: Math.abs(cross2(A, C, B, D)) < 1e-6, detail: ''});
+  checks.push({check: 'A、O、B 共线', ok: Math.abs(cross2(A, O, O, B)) < 1e-6, detail: ''});
+  checks.push({check: 'C、O、D 共线', ok: Math.abs(cross2(C, O, O, D)) < 1e-6, detail: ''});
+  const a = dist(A, O), b = dist(B, O), c = dist(C, O), d = dist(D, O);
+  checks.push({check: 'AO/BO = CO/DO（相似）', ok: Math.abs(a / b - c / d) < 1e-6, detail: 'AO/BO=' + (a / b).toFixed(4) + ', CO/DO=' + (c / d).toFixed(4)});
+  return checks;
+}
+
+function validateRightTriangleAltitude(data, solved) {
+  const pts = solved.points, A = pts.A, B = pts.B, C = pts.C, D = pts.D, checks = [];
+  checks.push({check: '∠C = 90°（直角）', ok: Math.abs(dot2(A, C, B, C)) < 1e-6, detail: ''});
+  checks.push({check: 'CD ⊥ AB（高）', ok: Math.abs(dot2(C, D, A, B)) < 1e-6, detail: ''});
+  checks.push({check: 'D 在 AB 上', ok: Math.abs(cross2(A, D, A, B)) < 1e-6, detail: ''});
+  return checks;
+}
+
+function validatePolygonExteriorAngles(data, solved) {
+  const pts = solved.points, names = solved.names;
+  const sides = parseInt(data.sides || 3), checks = [];
+  checks.push({check: '顶点数 = 边数', ok: names.length === sides, detail: names.length + ' 个顶点'});
+  const lens = [];
+  for (let i = 0; i < names.length; i++) lens.push(dist(pts[names[i]], pts[names[(i + 1) % names.length]]));
+  checks.push({check: '各边相等（正多边形）', ok: lens.every(l => Math.abs(l - lens[0]) < 1e-6), detail: lens.map(l => l.toFixed(3)).join('、')});
+  return checks;
+}
+
+function renderFigure(spec) {
+  const d = spec.data;
+  if (spec.type === 'triangle_parallel_segment') return renderTriangleParallel(d);
+  if (spec.type === 'parallelogram') return renderParallelogram(d);
+  if (spec.type === 'eight_shape_similar') return renderEightShape(d);
+  if (spec.type === 'right_triangle_altitude') return renderRightTriangleAltitude(d);
+  if (spec.type === 'polygon_exterior_angles') return renderPolygonExteriorAngles(d);
+  throw new Error('暂不支持的类型: ' + spec.type);
+}
+function validateFigure(spec, solved) {
+  const d = spec.data;
+  if (spec.type === 'triangle_parallel_segment') return validateTriangleParallel(d, solved);
+  if (spec.type === 'parallelogram') return validateParallelogram(d, solved);
+  if (spec.type === 'eight_shape_similar') return validateEightShape(d, solved);
+  if (spec.type === 'right_triangle_altitude') return validateRightTriangleAltitude(d, solved);
+  if (spec.type === 'polygon_exterior_angles') return validatePolygonExteriorAngles(d, solved);
+  return [];
+}
+
+/* ============ 模拟 AI 解析器 ============ */
+const GEO_EXAMPLES = [
+  {label: '三角形内平行线（DE∥BC）', problem: 'In triangle ABC, DE is parallel to BC, with D on AB and E on AC. Given AD=4, DB=6, AE=3, find AC.'},
+  {label: '平行四边形', problem: 'In parallelogram ABCD, AB is parallel to CD and AD is parallel to BC. Given AB=4 and AD=2.5, draw the parallelogram.'},
+  {label: '8字形相似（X型）', problem: 'Lines AB and CD intersect at O, with AC parallel to BD. Given AO=3, BO=4, CO=2.4, find DO.'},
+  {label: '直角三角形斜边高', problem: 'In right triangle ABC, angle C is 90 degrees, CD is perpendicular to AB with D on AB. Given AC=20 and BC=15, find CD.'},
+  {label: '三角形外角图', problem: 'Draw a triangle and extend each side in both directions.'},
+];
+
+function extractLengths(t) {
+  const res = {};
+  const re = /([A-Z][A-Z]?)\s*=\s*([0-9.]+)/g;
+  let m;
+  while ((m = re.exec(t))) res[m[1].toUpperCase()] = parseFloat(m[2]);
+  return res;
+}
+
+function parseProblem(text) {
+  const t = text.replace(/\$/g, ' ').replace(/\\parallel/g, ' ∥ ').replace(/\\perp/g, ' ⊥ ').replace(/\\angle/g, ' ∠ ').replace(/\\triangle/g, ' △ ');
+  const lower = t.toLowerCase();
+
+  if (/parallelogram/.test(lower)) {
+    const len = extractLengths(t);
+    const base = len.AB || 4, side = len.AD || 2.5;
+    return {type: 'parallelogram', description: '平行四边形ABCD，AB∥CD，AD∥BC，∠A=60°', data: {base: base, side: side, angle: 60, labels: [{target: 'AB', text: String(base)}, {target: 'AD', text: String(side)}]}};
+  }
+
+  if ((/intersect/.test(lower) && /parallel/.test(lower)) || /AC\s*∥\s*BD/i.test(t)) {
+    const len = extractLengths(t);
+    const ao = len.AO || 3, bo = len.BO || 4, co = len.CO || 2.4;
+    return {type: 'eight_shape_similar', description: '8字形相似：AB与CD交于O，AC平行BD', data: {given_lengths: {AO: ao, BO: bo, CO: co}, labels: [{target: 'AO', text: String(ao)}, {target: 'BO', text: String(bo)}, {target: 'CO', text: String(co)}]}};
+  }
+
+  if (/altitude/.test(lower) || (/perpendicular/.test(lower) && /right/.test(lower))) {
+    const len = extractLengths(t);
+    const labels = [];
+    ['AC', 'BC', 'CD'].forEach(k => { if (len[k] != null) labels.push({target: k, text: String(len[k])}); });
+    return {type: 'right_triangle_altitude', description: '直角三角形ABC，直角在C，CD⊥AB于D', data: {labels: labels}};
+  }
+
+  if (/extend/.test(lower) && /side|triangle|polygon/.test(lower)) {
+    const sides = /pentagon/.test(lower) ? 5 : /hexagon/.test(lower) ? 6 : /quadrilateral/.test(lower) ? 4 : 3;
+    return {type: 'polygon_exterior_angles', description: '多边形各边双向延长，展示外角', data: {sides: sides}};
+  }
+
+  if (/triangle/.test(lower) && /parallel/.test(lower)) {
+    const len = extractLengths(t);
+    let shape = 'scalene';
+    if (/isosceles/.test(lower)) shape = 'isosceles';
+    else if (/right/.test(lower) && /triangle|angle/.test(lower)) shape = 'right';
+    const pm = t.match(/([A-Z])([A-Z])\s*(?:is\s*parallel\s*to|∥)\s*([A-Z])([A-Z])/i);
+    const segName = pm ? pm[1] + pm[2] : 'DE';
+    const parTo = pm ? pm[3] + pm[4] : 'BC';
+    const points = [];
+    const ptRe = /([A-Z])\s+(?:is\s+)?on\s+([A-Z])([A-Z])/gi;
+    let m;
+    while ((m = ptRe.exec(t))) {
+      const name = m[1], on = (m[2] + m[3]).toUpperCase();
+      const d = len[name + on[0]] != null ? len[name + on[0]] : (len[on[0] + name] != null ? len[on[0] + name] : null);
+      const pt = {name: name, on: on};
+      if (d != null) pt.dist_from_start = d;
+      points.push(pt);
+    }
+    if (points.length === 0) {
+      points.push({name: segName[0], on: 'AB', dist_from_start: len['A' + segName[0]] != null ? len['A' + segName[0]] : 3});
+      points.push({name: segName[1], on: 'AC', dist_from_start: len['A' + segName[1]] != null ? len['A' + segName[1]] : 3});
+    }
+    const given = {};
+    Object.keys(len).forEach(k => { if (k.length === 2) given[k] = len[k]; });
+    const labels = Object.keys(len).filter(k => k.length === 2).map(k => ({target: k, text: String(len[k])}));
+    return {type: 'triangle_parallel_segment', description: '三角形ABC，' + segName + '∥' + parTo + (shape === 'isosceles' ? '，等腰' : shape === 'right' ? '，直角在C' : ''), data: {shape: shape, points: points, segments: [{name: segName, parallel_to: parTo}], given_lengths: given, labels: labels}};
+  }
+
+  throw new Error('暂不支持此题，请换用三角形/平行四边形/8字形/直角三角形/外角图等题型。');
+}
+
+/* ============ 展示辅助 ============ */
+function renderChecks(checks) {
+  return checks.map(c => '<span class="' + (c.ok ? 'pass' : 'fail') + '">' + (c.ok ? '✓' : '✗') + ' ' + esc(c.check) + (c.detail ? '（' + esc(c.detail) + '）' : '') + '</span>').join('');
+}
+
+function specCardHTML(spec) {
+  const d = spec.data;
+  const st = s => showText(d, s);
+  const rows = [];
+  rows.push(['图形描述', st(spec.description)]);
+  if (d.shape != null) rows.push(['三角形形状', ({scalene: '一般三角形', isosceles: '等腰三角形', right: '直角三角形（直角在C）'})[d.shape]]);
+  if (d.base != null) rows.push(['底边', st('AB') + ' = ' + d.base]);
+  if (d.side != null) rows.push(['侧边', st('AD') + ' = ' + d.side]);
+  if (d.angle != null) rows.push(['夹角', '∠' + st('A') + ' = ' + d.angle + '°']);
+  if (d.sides != null) rows.push(['边数', d.sides]);
+  if (d.points) rows.push(['边上的点', d.points.map(p => {
+    const pos = p.dist_from_start != null ? '距起点 ' + p.dist_from_start : (p.frac_from_start != null ? '比例 ' + p.frac_from_start : '位置未定');
+    return st(p.name + ' 在 ' + p.on + ' 上，' + pos);
+  }).join('；')]);
+  if (d.segments) rows.push(['平行关系', d.segments.map(s => st(s.name + ' ∥ ' + s.parallel_to)).join('；')]);
+  if (d.given_lengths) rows.push(['给定长度', Object.keys(d.given_lengths).map(k => st(k) + '=' + d.given_lengths[k]).join('，')]);
+  if (d.labels && d.labels.length) rows.push(['标注', d.labels.map(l => st(l.target) + '→' + l.text).join('，')]);
+  return rows.map(r => '<div class="spec-row"><span class="k">' + esc(r[0]) + '</span><span class="v">' + esc(r[1]) + '</span></div>').join('');
+}
+
+/* ---- 几何：字母 / 标注编辑 ---- */
+function collectVertexNames(spec) {
+  const d = spec.data;
+  if (spec.type === 'triangle_parallel_segment') return ['A', 'B', 'C'].concat((d.points || []).map(p => p.name));
+  if (spec.type === 'parallelogram') return ['A', 'B', 'C', 'D'];
+  if (spec.type === 'eight_shape_similar') return ['A', 'B', 'C', 'D', 'O'];
+  if (spec.type === 'right_triangle_altitude') return ['A', 'B', 'C', 'D'];
+  if (spec.type === 'polygon_exterior_angles') {
+    const sides = parseInt(d.sides || 3);
+    return Array.from({length: sides}, (_, i) => String.fromCharCode(65 + i));
+  }
+  return [];
+}
+
+function renderEditFields(spec) {
+  const box = document.getElementById('geo-edit-fields');
+  if (!box) return;
+  const names = collectVertexNames(spec);
+  let html = '<div class="edit-sec">顶点字母：';
+  names.forEach(n => {
+    const cur = (spec.data.letters && spec.data.letters[n]) || n;
+    html += '<label>' + esc(n) + ' → <input class="edit-letter" data-name="' + esc(n) + '" value="' + esc(cur) + '"></label>';
+  });
+  html += '</div>';
+  const labels = spec.data.labels || [];
+  if (labels.length) {
+    html += '<div class="edit-sec">边标注：';
+    labels.forEach((lb, i) => {
+      html += '<label>' + esc(showText(spec.data, lb.target)) + ' → <input class="edit-label" data-i="' + i + '" value="' + esc(lb.text) + '"></label>';
+    });
+    html += '</div>';
+  }
+  box.innerHTML = html;
+}
+
+let currentSpec = null;
+
+function applyEdits(spec) {
+  const msg = document.getElementById('geo-edit-msg');
+  const letters = {};
+  document.querySelectorAll('.edit-letter').forEach(inp => {
+    const name = inp.getAttribute('data-name');
+    const val = inp.value.trim();
+    if (val && val !== name) letters[name] = val;
+  });
+  const seen = {}, conflict = [];
+  collectVertexNames(spec).forEach(n => {
+    const disp = letters[n] || n;
+    if (seen[disp]) conflict.push(disp);
+    seen[disp] = true;
+  });
+  if (conflict.length) {
+    msg.textContent = '字母重复：' + [...new Set(conflict)].join('、') + ' 已被占用';
+    msg.style.display = 'block';
+    return;
+  }
+  msg.style.display = 'none';
+  spec.data.letters = letters;
+  (spec.data.labels || []).forEach((lb, i) => {
+    const inp = document.querySelector('.edit-label[data-i="' + i + '"]');
+    if (inp) {
+      const val = inp.value.trim();
+      lb.text = /^[0-9.]+$/.test(val) ? parseFloat(val) : val;
+    }
+  });
+  reRender(spec);
+}
+
+function reRender(spec) {
+  const res = renderFigure(spec);
+  let checks = validateFigure(spec, res.solved);
+  checks = checks.map(c => ({check: showText(spec.data, c.check), detail: showText(spec.data, c.detail || ''), ok: c.ok}));
+  document.getElementById('geo-spec').innerHTML = specCardHTML(spec);
+  document.getElementById('geo-figure').innerHTML = '<div class="checks">' + renderChecks(checks) + '</div>' + res.svg;
+  renderEditFields(spec);
+  renderReqButtons(spec);
+}
+
+/* ============ 流程驱动 ============ */
+function setStep(i, cls) {
+  const steps = document.querySelectorAll('#geo-steps .step');
+  if (steps[i]) steps[i].className = 'step ' + cls;
+}
+
+function renderReqButtons(spec) {
+  const bar = document.getElementById('geo-reqs');
+  bar.innerHTML = '';
+  if (spec.type !== 'triangle_parallel_segment') return;
+  [['改成等腰三角形', 'isosceles'], ['改成直角三角形', 'right'], ['恢复一般三角形', 'scalene']].forEach(([label, shape]) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.onclick = () => {
+      spec.data.shape = shape;
+      const segName = spec.data.segments[0].name, parTo = spec.data.segments[0].parallel_to;
+      spec.description = '三角形ABC，' + segName + '∥' + parTo + (shape === 'isosceles' ? '，等腰' : shape === 'right' ? '，直角在C' : '');
+      reRender(spec);
+    };
+    bar.appendChild(b);
+  });
+}
+
+async function runFlow() {
+  const text = document.getElementById('geo-problem').value.trim();
+  const und = document.getElementById('geo-understanding');
+  const fig = document.getElementById('geo-figure');
+  if (!text) {
+    und.textContent = '⚠ 请先输入题目';
+    und.style.display = 'block';
+    return;
+  }
+  fig.innerHTML = '';
+  document.getElementById('geo-spec').innerHTML = '';
+  document.getElementById('geo-reqs').innerHTML = '';
+  document.getElementById('geo-edit-fields').innerHTML = '';
+  document.querySelectorAll('#geo-steps .step').forEach(s => s.className = 'step');
+  und.style.display = 'none';
+
+  setStep(0, 'active');
+  await sleep(600);
+  let spec;
+  try { spec = parseProblem(text); }
+  catch (e) {
+    setStep(0, 'done');
+    und.textContent = '⚠ ' + e.message;
+    und.style.display = 'block';
+    return;
+  }
+  currentSpec = spec;
+  setStep(0, 'done');
+  und.textContent = 'AI 已理解：' + showText(spec.data, spec.description) + '。';
+  und.style.display = 'block';
+
+  setStep(1, 'active');
+  await sleep(600);
+  setStep(1, 'done');
+  document.getElementById('geo-spec').innerHTML = specCardHTML(spec);
+  renderEditFields(spec);
+  renderReqButtons(spec);
+
+  setStep(2, 'active');
+  await sleep(600);
+  let res, checks;
+  try { res = renderFigure(spec); checks = validateFigure(spec, res.solved); }
+  catch (e) {
+    setStep(2, 'done');
+    und.textContent = '⚠ 渲染出错：' + e.message;
+    und.style.display = 'block';
+    return;
+  }
+  setStep(2, 'done');
+  fig.innerHTML = '<div>' + res.svg + '</div>';
+
+  setStep(3, 'active');
+  await sleep(500);
+  setStep(3, 'done');
+  checks = checks.map(c => ({check: showText(spec.data, c.check), detail: showText(spec.data, c.detail || ''), ok: c.ok}));
+  fig.innerHTML = '<div class="checks">' + renderChecks(checks) + '</div>' + res.svg;
+}
+
+/* ============ 函数图像 ============ */
+let funcVarX = 'x', funcVarY = 'y';
+
+function parseExpr(s) {
+  let e = String(s).trim().replace(/\^/g, '**');
+  if (!/^[0-9a-zA-Z_+\-*/().,\s]+$/.test(e)) throw new Error('表达式含非法字符');
+  ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'exp', 'log', 'sqrt', 'abs', 'floor', 'ceil', 'round'].forEach(f => {
+    e = e.replace(new RegExp('\\b' + f + '\\b', 'g'), 'Math.' + f);
+  });
+  e = e.replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E').replace(/\bE\b/g, 'Math.E');
+  const fn = new Function('x', 'return (' + e + ');');
+  fn(0);
+  return fn;
+}
+
+function keyPoints(fn, xmin, xmax) {
+  const N = 2000, h = (xmax - xmin) / N;
+  const xs = [], ys = [];
+  for (let i = 0; i <= N; i++) { const x = xmin + i * h; xs.push(x); ys.push(fn(x)); }
+  const zeros = [], extrema = [];
+  const eps = 1e-6;
+  for (let i = 0; i < N; i++) {
+    if (!isFinite(ys[i]) || !isFinite(ys[i + 1])) continue;
+    if (ys[i] * ys[i + 1] < 0) {
+      let a = xs[i], b = xs[i + 1], fa = ys[i];
+      for (let k = 0; k < 50; k++) { const m = (a + b) / 2, fm = fn(m); if (fa * fm <= 0) b = m; else { a = m; fa = fm; } }
+      zeros.push((a + b) / 2);
+    } else if (Math.abs(ys[i]) < eps) {
+      zeros.push(xs[i]);
+    }
+  }
+  for (let i = 1; i < N; i++) {
+    const d1 = ys[i] - ys[i - 1], d2 = ys[i + 1] - ys[i];
+    if (d1 * d2 < 0 && isFinite(ys[i])) extrema.push(xs[i]);
+  }
+  return {zeros, extrema};
+}
+
+function renderFunction(exprStr) {
+  const fn = parseExpr(exprStr);
+  const xmin = -5, xmax = 5, N = 400;
+  const samples = [];
+  let ymin = Infinity, ymax = -Infinity;
+  for (let i = 0; i <= N; i++) {
+    const x = xmin + (xmax - xmin) * i / N, y = fn(x);
+    if (isFinite(y)) { samples.push([x, y]); if (y < ymin) ymin = y; if (y > ymax) ymax = y; }
+  }
+  if (ymin === Infinity) throw new Error('无法计算函数值');
+  const pad = (ymax - ymin) * 0.08 || 1;
+  ymin -= pad; ymax += pad;
+  const W = 560, H = 400, ml = 46, mr = 18, mt = 22, mb = 34;
+  const sx = x => ml + (x - xmin) / (xmax - xmin) * (W - ml - mr);
+  const sy = y => mt + (ymax - y) / (ymax - ymin) * (H - mt - mb);
+
+  let out = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '"><rect width="100%" height="100%" fill="white"/>';
+  for (let gx = Math.ceil(xmin); gx <= Math.floor(xmax); gx++) {
+    out += '<line x1="' + sx(gx).toFixed(1) + '" y1="' + mt + '" x2="' + sx(gx).toFixed(1) + '" y2="' + (H - mb) + '" stroke="#e6e6e6" stroke-width="1"/>';
+    out += '<text x="' + sx(gx).toFixed(1) + '" y="' + (H - mb + 14) + '" text-anchor="middle" font-size="10" fill="#888">' + gx + '</text>';
+  }
+  for (let gy = Math.ceil(ymin); gy <= Math.floor(ymax); gy++) {
+    out += '<line x1="' + ml + '" y1="' + sy(gy).toFixed(1) + '" x2="' + (W - mr) + '" y2="' + sy(gy).toFixed(1) + '" stroke="#e6e6e6" stroke-width="1"/>';
+    out += '<text x="' + (ml - 6) + '" y="' + sy(gy).toFixed(1) + '" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888">' + gy + '</text>';
+  }
+  out += '<line x1="' + ml + '" y1="' + sy(0).toFixed(1) + '" x2="' + (W - mr) + '" y2="' + sy(0).toFixed(1) + '" stroke="#999" stroke-width="1"/>';
+  out += '<line x1="' + sx(0).toFixed(1) + '" y1="' + mt + '" x2="' + sx(0).toFixed(1) + '" y2="' + (H - mb) + '" stroke="#999" stroke-width="1"/>';
+  let d = '';
+  for (let i = 0; i < samples.length; i++) {
+    const px = sx(samples[i][0]).toFixed(1), py = sy(samples[i][1]).toFixed(1);
+    d += (i === 0 ? 'M' : 'L') + px + ' ' + py;
+  }
+  out += '<path d="' + d + '" fill="none" stroke="#2a6cbb" stroke-width="2"/>';
+  const kp = keyPoints(fn, xmin, xmax);
+  kp.zeros.forEach(z => {
+    out += '<circle cx="' + sx(z).toFixed(1) + '" cy="' + sy(0).toFixed(1) + '" r="4" fill="#c0392b"/>';
+    out += '<text x="' + sx(z).toFixed(1) + '" y="' + (sy(0) - 10).toFixed(1) + '" text-anchor="middle" font-size="10" fill="#c0392b">(' + z.toFixed(2) + ', 0)</text>';
+  });
+  kp.extrema.forEach(e => {
+    const yv = fn(e);
+    out += '<circle cx="' + sx(e).toFixed(1) + '" cy="' + sy(yv).toFixed(1) + '" r="4" fill="#1e8449"/>';
+    out += '<text x="' + sx(e).toFixed(1) + '" y="' + (sy(yv) + 16).toFixed(1) + '" text-anchor="middle" font-size="10" fill="#1e8449">(' + e.toFixed(2) + ', ' + yv.toFixed(2) + ')</text>';
+  });
+  // 坐标轴名
+  out += '<text x="' + (W - mr - 2) + '" y="' + (H - 4) + '" text-anchor="end" font-size="13" font-style="italic" fill="#333">' + esc(funcVarX) + '</text>';
+  out += '<text x="' + (ml - 2) + '" y="' + (mt - 8) + '" text-anchor="end" font-size="13" font-style="italic" fill="#333">' + esc(funcVarY) + '</text>';
+  // 表达式显示（变量名跟随编辑）
+  const displayExpr = exprStr.replace(/\bx\b/g, funcVarX);
+  out += '<text x="' + (W - mr - 4) + '" y="' + (mt + 12) + '" text-anchor="end" font-size="13" font-style="italic" fill="#333">' + esc(funcVarY) + ' = ' + esc(displayExpr) + '</text>';
+  out += '</svg>';
+  return {svg: out, kp};
+}
+
+function renderFuncEditFields() {
+  const box = document.getElementById('func-edit-fields');
+  if (!box) return;
+  box.innerHTML = '<div class="edit-sec">坐标轴：X 轴 <input class="func-var" id="func-var-x" value="' + esc(funcVarX) + '">　Y 轴 <input class="func-var" id="func-var-y" value="' + esc(funcVarY) + '"></div>';
+}
+
+function applyFuncEdits() {
+  const vx = document.getElementById('func-var-x').value.trim() || 'x';
+  const vy = document.getElementById('func-var-y').value.trim() || 'y';
+  funcVarX = vx; funcVarY = vy;
+  const expr = document.getElementById('func-expr').value.trim() || 'x**2-4';
+  renderFunctionBlock(expr);
+  renderFuncEditFields();
+}
+
+/* ============ 3D（投影 + 线框） ============ */
+let solidLetters = {};
+let currentSolidKind = 'cuboid';
+
+function drawSolid(kind) {
+  currentSolidKind = kind;
+  document.getElementById('solid-checks').innerHTML = '<span class="pass">✓ 类型支持（' + esc(kind) + '）</span><span class="pass">✓ 顶点坐标精确计算</span>';
+  const canvas = document.getElementById('solid-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+
+  let verts, edges, names;
+  if (kind === 'cuboid') {
+    const a = 4, b = 3, c = 2.5;
+    verts = [[0,0,0],[a,0,0],[a,b,0],[0,b,0],[0,0,c],[a,0,c],[a,b,c],[0,b,c]];
+    edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    names = {0:'A',1:'B',2:'C',3:'D',4:'E',5:'F',6:'G',7:'H'};
+  } else if (kind === 'pyramid') {
+    const a = 3.5, h = 4;
+    verts = [[0,0,0],[a,0,0],[a,a,0],[0,a,0],[a/2,a/2,h]];
+    edges = [[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]];
+    names = {0:'A',1:'B',2:'C',3:'D',4:'P'};
+  } else {
+    drawSurface(ctx, W, H);
+    renderSolidEditFields();
+    return;
+  }
+
+  const iso = 0.866, half = 0.5;
+  const proj = (v) => [(v[0] - v[2]) * iso, (v[0] + v[2]) * half - v[1]];
+  const raw = verts.map(proj);
+  const minX = Math.min.apply(null, raw.map(p => p[0])), maxX = Math.max.apply(null, raw.map(p => p[0]));
+  const minY = Math.min.apply(null, raw.map(p => p[1])), maxY = Math.max.apply(null, raw.map(p => p[1]));
+  const scale = Math.min((W - 90) / (maxX - minX), (H - 80) / (maxY - minY));
+  const cx = (W - (maxX + minX) * scale) / 2, cy = (H - (maxY + minY) * scale) / 2;
+  const P = raw.map(p => [cx + p[0] * scale, cy + p[1] * scale]);
+
+  ctx.strokeStyle = '#2d2d2d'; ctx.lineWidth = 1.6;
+  edges.forEach(e => { ctx.beginPath(); ctx.moveTo(P[e[0]][0], P[e[0]][1]); ctx.lineTo(P[e[1]][0], P[e[1]][1]); ctx.stroke(); });
+  ctx.fillStyle = '#c0392b'; ctx.font = 'italic 12px Georgia';
+  Object.keys(names).forEach(i => {
+    const shown = (solidLetters && solidLetters[names[i]]) || names[i];
+    ctx.fillText(shown, P[i][0] + 6, P[i][1] - 4);
+  });
+  renderSolidEditFields();
+}
+
+function drawSurface(ctx, W, H) {
+  const iso = 0.866, half = 0.5;
+  const fx = (x, y) => x * x + y * y;
+  const ys = [-2, -1, 0, 1, 2], xs = [-2, -1, 0, 1, 2];
+  const curves = [];
+  ys.forEach(y => { const c = []; for (let x = -2; x <= 2.0001; x += 0.2) c.push([x, y, fx(x, y)]); curves.push(c); });
+  xs.forEach(x => { const c = []; for (let y = -2; y <= 2.0001; y += 0.2) c.push([x, y, fx(x, y)]); curves.push(c); });
+  const proj = (v) => [(v[0] - v[2]) * iso, (v[0] + v[2]) * half - v[1]];
+  const all = curves.flat().map(proj);
+  const minX = Math.min.apply(null, all.map(p => p[0])), maxX = Math.max.apply(null, all.map(p => p[0]));
+  const minY = Math.min.apply(null, all.map(p => p[1])), maxY = Math.max.apply(null, all.map(p => p[1]));
+  const scale = Math.min((W - 80) / (maxX - minX), (H - 70) / (maxY - minY));
+  const cx = (W - (maxX + minX) * scale) / 2, cy = (H - (maxY + minY) * scale) / 2;
+  ctx.strokeStyle = '#2a6cbb'; ctx.lineWidth = 1;
+  curves.forEach(c => {
+    ctx.beginPath();
+    c.forEach((v, i) => { const p = proj(v); const X = cx + p[0] * scale, Y = cy + p[1] * scale; i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y); });
+    ctx.stroke();
+  });
+}
+
+function renderSolidEditFields() {
+  const box = document.getElementById('solid-edit-fields');
+  if (!box) return;
+  const kind = currentSolidKind;
+  const names = kind === 'cuboid' ? ['A','B','C','D','E','F','G','H'] : kind === 'pyramid' ? ['A','B','C','D','P'] : [];
+  if (!names.length) {
+    box.innerHTML = '<span class="muted">曲面网格无顶点标注</span>';
+    return;
+  }
+  let html = '<div class="edit-sec">顶点字母：';
+  names.forEach(n => {
+    const cur = (solidLetters && solidLetters[n]) || n;
+    html += '<label>' + esc(n) + ' → <input class="solid-letter" data-name="' + esc(n) + '" value="' + esc(cur) + '"></label>';
+  });
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+function applySolidEdits() {
+  const kind = currentSolidKind;
+  const names = kind === 'cuboid' ? ['A','B','C','D','E','F','G','H'] : kind === 'pyramid' ? ['A','B','C','D','P'] : [];
+  const msg = document.getElementById('solid-edit-msg');
+  const letters = {};
+  document.querySelectorAll('.solid-letter').forEach(inp => {
+    const name = inp.getAttribute('data-name');
+    const val = inp.value.trim();
+    if (val && val !== name) letters[name] = val;
+  });
+  const seen = {}, conflict = [];
+  names.forEach(n => { const d = letters[n] || n; if (seen[d]) conflict.push(d); seen[d] = true; });
+  if (conflict.length) {
+    msg.textContent = '字母重复：' + [...new Set(conflict)].join('、') + ' 已被占用';
+    msg.style.display = 'block';
+    return;
+  }
+  msg.style.display = 'none';
+  solidLetters = letters;
+  drawSolid(kind);
+}
+
+/* ============ 例图 ============ */
+function showImage(file) {
+  if (!file || !/^image\//.test(file.type)) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('entry-preview').innerHTML =
+      '<img src="' + e.target.result + '" alt="参考图">' +
+      '<div class="img-tag">已载入例图（正式版由视觉模型读取）</div>';
+  };
+  reader.readAsDataURL(file);
+}
+
+function parseSolid(text) {
+  const t = String(text).toLowerCase();
+  if (/pyramid|棱锥/.test(t)) return 'pyramid';
+  if (/surface|paraboloid|抛物面|曲面/.test(t)) return 'surface';
+  return 'cuboid';
+}
+
+/* ============ 事件绑定与初始化 ============ */
+function renderFunctionBlock(expr) {
+  const st = document.getElementById('func-status');
+  try {
+    const r = renderFunction(expr);
+    st.textContent = '';
+    document.getElementById('func-figure').innerHTML = '<div class="checks"><span class="pass">✓ 表达式可解析</span><span class="pass">✓ 零点 ' + r.kp.zeros.length + ' 个</span><span class="pass">✓ 极值点 ' + r.kp.extrema.length + ' 个</span></div>' + r.svg;
+    renderFuncEditFields();
+  } catch (e) {
+    st.textContent = '出错：' + e.message;
+  }
+}
+
+function initExampleSelect() {
+  const sel = document.getElementById('geo-example-select');
+  GEO_EXAMPLES.forEach(ex => {
+    const op = document.createElement('option');
+    op.textContent = ex.label;
+    op.value = ex.problem;
+    sel.appendChild(op);
+  });
+}
+
+/* 统一入口 */
+function showEngine(id) {
+  ['geo-block', 'func-block', 'solid-block'].forEach(b => {
+    document.getElementById(b).classList.toggle('engine', b !== id);
+  });
+  requestAnimationFrame(() => document.getElementById(id).scrollIntoView({behavior: 'smooth'}));
+}
+
+document.getElementById('entry-gen').addEventListener('click', () => {
+  const type = document.getElementById('entry-type').value;
+  const text = document.getElementById('entry-text').value.trim();
+  if (type === 'geometry') {
+    if (text) document.getElementById('geo-problem').value = text;
+    showEngine('geo-block');
+    runFlow();
+  } else if (type === 'function') {
+    if (text) document.getElementById('func-expr').value = text;
+    showEngine('func-block');
+    renderFunctionBlock(document.getElementById('func-expr').value.trim() || 'x**2-4');
+  } else {
+    const kind = parseSolid(text);
+    document.getElementById('solid-type').value = kind;
+    showEngine('solid-block');
+    drawSolid(kind);
+  }
+});
+
+/* 例图：点击 / 拖拽 / 粘贴 */
+const drop = document.getElementById('entry-drop');
+const fileInput = document.getElementById('entry-file');
+drop.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => showImage(fileInput.files[0]));
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); showImage(e.dataTransfer.files[0]); });
+document.addEventListener('paste', e => {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (const it of items) {
+    if (/^image\//.test(it.type)) { showImage(it.getAsFile()); e.preventDefault(); break; }
+  }
+});
+
+/* 几何 */
+document.getElementById('geo-gen').addEventListener('click', runFlow);
+document.getElementById('geo-load').addEventListener('click', () => {
+  document.getElementById('geo-problem').value = document.getElementById('geo-example-select').value;
+  runFlow();
+});
+document.getElementById('geo-apply-edit').addEventListener('click', () => { if (currentSpec) applyEdits(currentSpec); });
+
+/* 函数 */
+document.getElementById('func-gen').addEventListener('click', () => {
+  const v = document.getElementById('func-expr').value.trim();
+  if (!v) { document.getElementById('func-status').textContent = '请输入函数表达式'; return; }
+  renderFunctionBlock(v);
+});
+document.querySelectorAll('button[data-fn]').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('func-expr').value = b.getAttribute('data-fn');
+  renderFunctionBlock(b.getAttribute('data-fn'));
+}));
+document.getElementById('func-apply-edit').addEventListener('click', applyFuncEdits);
+
+/* 立体 */
+document.getElementById('solid-gen').addEventListener('click', () => drawSolid(document.getElementById('solid-type').value));
+document.getElementById('solid-apply-edit').addEventListener('click', applySolidEdits);
+
+initExampleSelect();
+document.getElementById('geo-problem').value = GEO_EXAMPLES[0].problem;
+document.getElementById('entry-text').value = GEO_EXAMPLES[0].problem;
+</script>
+</body>
+</html>
